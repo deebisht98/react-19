@@ -1,4 +1,5 @@
 import React, { useActionState, useOptimistic } from "react";
+import { useFormStatus } from "react-dom";
 
 async function submitFeedback(previousState, formData) {
   const feedback = formData.get("feedback");
@@ -48,6 +49,7 @@ export default function App() {
   return (
     <form
       action={(formData) => {
+        // react 19 actions
         const feedback = formData.get("feedback");
         addOptimistic(feedback);
         formAction(formData);
@@ -58,9 +60,7 @@ export default function App() {
 
       <textarea name="feedback" placeholder="Enter your feedback" rows={4} />
 
-      <button type="submit" disabled={isPending}>
-        {isPending ? "Submitting..." : "Submit Feedback"}
-      </button>
+      <Button />
 
       {/* Comprehensive State Rendering */}
       {optimisticState.status === "PENDING" && (
@@ -84,10 +84,6 @@ export default function App() {
         >
           ❌ {optimisticState.message}
           <button
-            onClick={() => {
-              // Optional: Retry mechanism
-              formAction(new FormData(document.querySelector("form")));
-            }}
             style={{
               marginLeft: "10px",
               backgroundColor: "red",
@@ -104,3 +100,13 @@ export default function App() {
     </form>
   );
 }
+
+const Button = () => {
+  const { pending, data, method, action } = useFormStatus();
+  console.log(pending, data, method, action);
+  return (
+    <button type="submit" disabled={pending}>
+      {pending ? "Submitting -> " + data.get("feedback") : "Submit Feedback"}
+    </button>
+  );
+};
